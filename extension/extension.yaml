@@ -1,0 +1,18 @@
+metadata:
+  name: draupnir
+  version: 1.0.0
+  description: Sindri instance agent for mimir fleet management
+  category: management
+  dependencies: []
+
+install:
+  method: script
+  script:
+    path: install.sh
+    timeout: 120
+
+validate:
+  commands:
+    - name: sindri-agent
+      versionFlag: --version
+      expectedPattern: "\\d+\\.\\d+\\.\\d+"

@@ -1,0 +1,52 @@
+name: "Update Sindri Extension"
+
+# On release, opens a PR against pacphi/sindri to update the draupnir
+# extension version in v3/extensions/draupnir/extension.yaml.
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-extension:
+    name: Update extension.yaml in sindri
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Extract version
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout sindri
+        uses: actions/checkout@v6
+        with:
+          repository: pacphi/sindri
+          token: ${{ secrets.SINDRI_PAT }}
+          path: sindri
+
+      - name: Update extension.yaml
+        run: |
+          cd sindri
+          FILE="v3/extensions/draupnir/extension.yaml"
+          if [ -f "$FILE" ]; then
+            sed -i "s/version: .*/version: ${{ steps.version.outputs.version }}/" "$FILE"
+          else
+            echo "::warning::Extension file not found: $FILE"
+            exit 0
+          fi
+
+      - name: Create PR
+        run: |
+          cd sindri
+          BRANCH="chore/draupnir-v${{ steps.version.outputs.version }}"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "chore(extensions): bump draupnir to v${{ steps.version.outputs.version }}"
+          git push origin "$BRANCH"
+          gh pr create \
+            --title "chore(extensions): bump draupnir to v${{ steps.version.outputs.version }}" \
+            --body "Automated PR from draupnir release v${{ steps.version.outputs.version }}." \
+            --base main
+        env:
+          GH_TOKEN: ${{ secrets.SINDRI_PAT }}
