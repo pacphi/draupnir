@@ -14,7 +14,6 @@ const (
 	defaultMetricsInterval   = 60 * time.Second
 	defaultShell             = "/bin/bash"
 	defaultLogLevel          = "info"
-	agentVersion             = "0.1.0"
 )
 
 // Config holds all runtime configuration for the agent.
@@ -56,7 +55,7 @@ type Config struct {
 
 // Load reads configuration from environment variables.
 // Required: SINDRI_CONSOLE_URL, SINDRI_CONSOLE_API_KEY
-func Load() (*Config, error) {
+func Load(version string) (*Config, error) {
 	cfg := &Config{
 		ConsoleURL:        os.Getenv("SINDRI_CONSOLE_URL"),
 		APIKey:            os.Getenv("SINDRI_CONSOLE_API_KEY"),
@@ -68,7 +67,7 @@ func Load() (*Config, error) {
 		HeartbeatInterval: defaultHeartbeatInterval,
 		MetricsInterval:   defaultMetricsInterval,
 		Tags:              map[string]string{},
-		Version:           agentVersion,
+		Version:           version,
 	}
 
 	if cfg.ConsoleURL == "" {

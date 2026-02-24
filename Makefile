@@ -16,6 +16,7 @@ RESET   := \033[0m
 
 GO      := go
 BINARY  := draupnir
+VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 
 # ============================================================================
 # Build
@@ -24,16 +25,16 @@ BINARY  := draupnir
 build:
 	@echo "$(BLUE)Building agent for current platform (static)...$(RESET)"
 	@mkdir -p dist
-	CGO_ENABLED=0 $(GO) build -ldflags "-s -w" -o dist/$(BINARY) ./cmd/agent
+	CGO_ENABLED=0 $(GO) build -ldflags "-s -w -X main.version=$(VERSION)" -o dist/$(BINARY) ./cmd/agent
 	@echo "$(GREEN)✓ Agent built: dist/$(BINARY)$(RESET)"
 
 build-all:
 	@echo "$(BLUE)Cross-compiling agent for all platforms...$(RESET)"
 	@mkdir -p dist
-	GOOS=linux  GOARCH=amd64 CGO_ENABLED=0 $(GO) build -ldflags "-s -w" -o dist/$(BINARY)-linux-amd64 ./cmd/agent
-	GOOS=linux  GOARCH=arm64 CGO_ENABLED=0 $(GO) build -ldflags "-s -w" -o dist/$(BINARY)-linux-arm64 ./cmd/agent
-	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 $(GO) build -ldflags "-s -w" -o dist/$(BINARY)-darwin-amd64 ./cmd/agent
-	GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 $(GO) build -ldflags "-s -w" -o dist/$(BINARY)-darwin-arm64 ./cmd/agent
+	GOOS=linux  GOARCH=amd64 CGO_ENABLED=0 $(GO) build -ldflags "-s -w -X main.version=$(VERSION)" -o dist/$(BINARY)-linux-amd64 ./cmd/agent
+	GOOS=linux  GOARCH=arm64 CGO_ENABLED=0 $(GO) build -ldflags "-s -w -X main.version=$(VERSION)" -o dist/$(BINARY)-linux-arm64 ./cmd/agent
+	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 $(GO) build -ldflags "-s -w -X main.version=$(VERSION)" -o dist/$(BINARY)-darwin-amd64 ./cmd/agent
+	GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 $(GO) build -ldflags "-s -w -X main.version=$(VERSION)" -o dist/$(BINARY)-darwin-arm64 ./cmd/agent
 	@echo "$(GREEN)✓ Cross-compiled binaries:$(RESET)"
 	@ls -lh dist/
 

@@ -12,6 +12,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log/slog"
 	"os"
@@ -28,7 +29,19 @@ import (
 	"github.com/pacphi/draupnir/pkg/protocol"
 )
 
+var version = "dev"
+
 func main() {
+	var showVersion bool
+	flag.BoolVar(&showVersion, "version", false, "print version and exit")
+	flag.BoolVar(&showVersion, "v", false, "print version and exit (shorthand)")
+	flag.Parse()
+
+	if showVersion {
+		fmt.Printf("draupnir %s\n", version)
+		return
+	}
+
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "agent: fatal error: %v\n", err)
 		os.Exit(1)
@@ -36,7 +49,7 @@ func main() {
 }
 
 func run() error {
-	cfg, err := config.Load()
+	cfg, err := config.Load(version)
 	if err != nil {
 		return fmt.Errorf("loading config: %w", err)
 	}

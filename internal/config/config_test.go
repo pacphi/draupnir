@@ -9,19 +9,19 @@ import (
 func TestLoad_RequiredEnvVars(t *testing.T) {
 	clearEnv()
 
-	_, err := Load()
+	_, err := Load("test")
 	if err == nil {
 		t.Fatal("expected error when SINDRI_CONSOLE_URL is missing")
 	}
 
 	t.Setenv("SINDRI_CONSOLE_URL", "http://console.test")
-	_, err = Load()
+	_, err = Load("test")
 	if err == nil {
 		t.Fatal("expected error when SINDRI_CONSOLE_API_KEY is missing")
 	}
 
 	t.Setenv("SINDRI_CONSOLE_API_KEY", "test-key")
-	cfg, err := Load()
+	cfg, err := Load("test")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -34,7 +34,7 @@ func TestLoad_Defaults(t *testing.T) {
 	clearEnv()
 	setRequired(t)
 
-	cfg, err := Load()
+	cfg, err := Load("test")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -51,8 +51,8 @@ func TestLoad_Defaults(t *testing.T) {
 	if cfg.LogLevel != "info" {
 		t.Errorf("LogLevel = %q, want info", cfg.LogLevel)
 	}
-	if cfg.Version == "" {
-		t.Error("Version must not be empty")
+	if cfg.Version != "test" {
+		t.Errorf("Version = %q, want %q", cfg.Version, "test")
 	}
 }
 
@@ -63,7 +63,7 @@ func TestLoad_Intervals(t *testing.T) {
 	t.Setenv("SINDRI_AGENT_HEARTBEAT", "15")
 	t.Setenv("SINDRI_AGENT_METRICS", "120")
 
-	cfg, err := Load()
+	cfg, err := Load("test")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -80,7 +80,7 @@ func TestLoad_InvalidInterval(t *testing.T) {
 	setRequired(t)
 
 	t.Setenv("SINDRI_AGENT_HEARTBEAT", "not-a-number")
-	_, err := Load()
+	_, err := Load("test")
 	if err == nil {
 		t.Fatal("expected error for invalid heartbeat interval")
 	}
@@ -92,7 +92,7 @@ func TestLoad_Tags(t *testing.T) {
 
 	t.Setenv("SINDRI_AGENT_TAGS", "env=production, team=platform")
 
-	cfg, err := Load()
+	cfg, err := Load("test")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -109,7 +109,7 @@ func TestLoad_TrailingSlashStripped(t *testing.T) {
 	t.Setenv("SINDRI_CONSOLE_URL", "https://console.example.com/")
 	t.Setenv("SINDRI_CONSOLE_API_KEY", "key")
 
-	cfg, err := Load()
+	cfg, err := Load("test")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
