@@ -125,7 +125,7 @@ Use `debug` when diagnosing connection or protocol issues. Switch back to `info`
 ```bash
 export SINDRI_CONSOLE_URL="https://mimir.example.com"
 export SINDRI_CONSOLE_API_KEY="sk-..."
-sindri-agent
+draupnir
 ```
 
 ## Example: full configuration
@@ -140,7 +140,7 @@ export SINDRI_AGENT_HEARTBEAT="15"
 export SINDRI_AGENT_METRICS="30"
 export SINDRI_AGENT_TAGS="env=production,team=platform"
 export SINDRI_LOG_LEVEL="info"
-sindri-agent
+draupnir
 ```
 
 ## Example: `.env` file (for local development)
@@ -154,4 +154,4 @@ SINDRI_PROVIDER=docker
 SINDRI_LOG_LEVEL=debug
 ```
 
-Load with: `set -a && source .env && set +a && sindri-agent`
+Load with: `set -a && source .env && set +a && draupnir`

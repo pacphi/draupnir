@@ -5,8 +5,8 @@ This guide covers the most common failure modes for the Draupnir agent. Start wi
 ## General diagnostic approach
 
 1. **Set `SINDRI_LOG_LEVEL=debug`** — this is the single most useful step. Debug logging shows WebSocket frames, registration attempts, reconnect timing, and goroutine events.
-2. **Run the agent in the foreground** — avoid starting via systemd or init systems while debugging; run `sindri-agent` directly in a terminal so logs go to stdout/stderr.
-3. **Confirm the binary** — run `sindri-agent --version` to confirm the binary is present and shows the expected version.
+2. **Run the agent in the foreground** — avoid starting via systemd or init systems while debugging; run `draupnir` directly in a terminal so logs go to stdout/stderr.
+3. **Confirm the binary** — run `draupnir --version` to confirm the binary is present and shows the expected version.
 
 ---
 
@@ -25,14 +25,14 @@ fatal: SINDRI_CONSOLE_URL is required
 ```bash
 export SINDRI_CONSOLE_URL="https://mimir.example.com"
 export SINDRI_CONSOLE_API_KEY="your-api-key"
-sindri-agent
+draupnir
 ```
 
 See [docs/CONFIGURATION.md](CONFIGURATION.md) for the full variable reference.
 
 ---
 
-### Symptom: `command not found: sindri-agent`
+### Symptom: `command not found: draupnir`
 
 The binary is not in `$PATH`.
 
@@ -40,7 +40,7 @@ The binary is not in `$PATH`.
 
 ```bash
 # Check if installed
-ls ~/.local/bin/sindri-agent
+ls ~/.local/bin/draupnir
 
 # Add to PATH (add to ~/.bashrc or ~/.zshrc for persistence)
 export PATH="$HOME/.local/bin:$PATH"
@@ -113,7 +113,7 @@ The agent connects, exchanges a few messages, then disconnects and reconnects in
 **Set debug logging to see the close reason:**
 
 ```bash
-SINDRI_LOG_LEVEL=debug sindri-agent
+SINDRI_LOG_LEVEL=debug draupnir
 ```
 
 Look for the `close code` in the log output:

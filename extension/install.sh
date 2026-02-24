@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # install.sh — Platform-aware binary installer for the draupnir agent.
 #
-# Downloads the correct sindri-agent binary from the latest GitHub release
-# and installs it to ~/.local/bin/sindri-agent.
+# Downloads the correct draupnir binary from the latest GitHub release
+# and installs it to ~/.local/bin/draupnir.
 #
 # Environment:
 #   DRAUPNIR_VERSION  — override version (default: latest release)
@@ -12,7 +12,7 @@ set -euo pipefail
 
 REPO="pacphi/draupnir"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
-BINARY_NAME="sindri-agent"
+BINARY_NAME="draupnir"
 
 # ── Detect platform ──────────────────────────────────────────────────────────
 

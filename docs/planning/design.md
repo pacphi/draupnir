@@ -155,7 +155,7 @@ install:
 
 validate:
   commands:
-    - name: sindri-agent
+    - name: draupnir
       versionFlag: --version
       expectedPattern: "\\d+\\.\\d+\\.\\d+"
 ```
@@ -166,18 +166,18 @@ validate:
 
 1. Detect OS and architecture (`uname -s`, `uname -m`)
 2. Resolve the latest release tag from GitHub API
-3. Download the appropriate static binary (`sindri-agent-{os}-{arch}`)
+3. Download the appropriate static binary (`draupnir-{os}-{arch}`)
 4. Verify SHA256 checksum
-5. Install to `~/.local/bin/sindri-agent` with `chmod +x`
+5. Install to `~/.local/bin/draupnir` with `chmod +x`
 
 ### Cross-Compilation Targets
 
 | OS | Arch | Binary name |
 |---|---|---|
-| Linux | amd64 | `sindri-agent-linux-amd64` |
-| Linux | arm64 | `sindri-agent-linux-arm64` |
-| macOS | amd64 | `sindri-agent-darwin-amd64` |
-| macOS | arm64 (M-series) | `sindri-agent-darwin-arm64` |
+| Linux | amd64 | `draupnir-linux-amd64` |
+| Linux | arm64 | `draupnir-linux-arm64` |
+| macOS | amd64 | `draupnir-darwin-amd64` |
+| macOS | arm64 (M-series) | `draupnir-darwin-arm64` |
 
 Built with `CGO_ENABLED=0` for fully static binaries — no glibc dependency on Linux.
 

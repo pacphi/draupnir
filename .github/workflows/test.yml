@@ -111,12 +111,12 @@ jobs:
           CGO_ENABLED: "0"
         run: |
           go build -trimpath -ldflags="-s -w" \
-            -o sindri-agent-${{ matrix.goos }}-${{ matrix.goarch }} \
+            -o draupnir-${{ matrix.goos }}-${{ matrix.goarch }} \
             ./cmd/agent
-          ls -lh sindri-agent-${{ matrix.goos }}-${{ matrix.goarch }}
+          ls -lh draupnir-${{ matrix.goos }}-${{ matrix.goarch }}
       - name: Check binary size
         run: |
-          binary="sindri-agent-${{ matrix.goos }}-${{ matrix.goarch }}"
+          binary="draupnir-${{ matrix.goos }}-${{ matrix.goarch }}"
           size_bytes=$(stat -c%s "$binary")
           size_mb=$(echo "scale=2; ${size_bytes} / 1048576" | bc)
           echo "Binary size: ${size_mb} MB (limit: ${{ env.MAX_BINARY_SIZE_MB }} MB)"

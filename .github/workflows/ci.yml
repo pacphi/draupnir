@@ -107,6 +107,6 @@ jobs:
           CGO_ENABLED: "0"
         run: |
           go build -ldflags "-s -w" \
-            -o sindri-agent-${{ matrix.goos }}-${{ matrix.goarch }} \
+            -o draupnir-${{ matrix.goos }}-${{ matrix.goarch }} \
             ./cmd/agent
-          ls -lh sindri-agent-${{ matrix.goos }}-${{ matrix.goarch }}
+          ls -lh draupnir-${{ matrix.goos }}-${{ matrix.goarch }}

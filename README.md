@@ -56,10 +56,10 @@ make build
 
 | OS | Architecture | Binary |
 |----|-------------|--------|
-| Linux | amd64 | `sindri-agent-linux-amd64` |
-| Linux | arm64 | `sindri-agent-linux-arm64` |
-| macOS | amd64 | `sindri-agent-darwin-amd64` |
-| macOS | arm64 (M-series) | `sindri-agent-darwin-arm64` |
+| Linux | amd64 | `draupnir-linux-amd64` |
+| Linux | arm64 | `draupnir-linux-arm64` |
+| macOS | amd64 | `draupnir-darwin-amd64` |
+| macOS | arm64 (M-series) | `draupnir-darwin-arm64` |
 
 ## CI
 

@@ -16,7 +16,7 @@ Thank you for your interest in contributing. Draupnir is a lightweight Go agent 
 git clone https://github.com/pacphi/draupnir.git
 cd draupnir
 make hooks      # install pre-commit hooks
-make build      # build for current platform → dist/sindri-agent
+make build      # build for current platform → dist/draupnir
 make test       # run unit tests with race detector
 ```
 

@@ -85,7 +85,7 @@ Triggered by: `push` to tags matching `v*`
 | `validate-tag` | Parses tag, validates semver format, detects pre-release |
 | `test` | Runs full test suite (`go test ./...`) |
 | `changelog` | Runs [git-cliff](https://git-cliff.org/) to regenerate `CHANGELOG.md` from all conventional commits, commits the updated file to `main`, and outputs the new release section body |
-| `build` (×4) | Cross-compiles `sindri-agent-{os}-{arch}` for all four targets with `CGO_ENABLED=0`; generates a SHA256 checksum file per binary |
+| `build` (×4) | Cross-compiles `draupnir-{os}-{arch}` for all four targets with `CGO_ENABLED=0`; generates a SHA256 checksum file per binary |
 | `release` | Creates a GitHub Release named `Draupnir v{version}` with the changelog body as release notes and all four binaries plus `checksums.txt` as assets |
 
 ### 2. `update-extension.yml` — Propagate to Sindri registry
@@ -141,10 +141,10 @@ Each stable release attaches these files:
 
 | File | Description |
 |------|-------------|
-| `sindri-agent-linux-amd64` | Linux x86-64 static binary |
-| `sindri-agent-linux-arm64` | Linux ARM64 static binary |
-| `sindri-agent-darwin-amd64` | macOS Intel static binary |
-| `sindri-agent-darwin-arm64` | macOS Apple Silicon static binary |
+| `draupnir-linux-amd64` | Linux x86-64 static binary |
+| `draupnir-linux-arm64` | Linux ARM64 static binary |
+| `draupnir-darwin-amd64` | macOS Intel static binary |
+| `draupnir-darwin-arm64` | macOS Apple Silicon static binary |
 | `checksums.txt` | SHA256 checksums for all four binaries |
 
 Binaries are built with `-ldflags "-s -w"` (stripped debug info) and `-trimpath` for reproducible builds.

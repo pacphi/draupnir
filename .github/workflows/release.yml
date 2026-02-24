@@ -109,7 +109,7 @@ jobs:
           CGO_ENABLED: "0"
           VERSION: ${{ needs.validate-tag.outputs.version }}
         run: |
-          BINARY="sindri-agent-${{ matrix.goos }}-${{ matrix.goarch }}"
+          BINARY="draupnir-${{ matrix.goos }}-${{ matrix.goarch }}"
           go build -ldflags "-s -w -X main.version=${VERSION}" -o "${BINARY}" ./cmd/agent
           sha256sum "${BINARY}" > "${BINARY}.sha256"
       - name: Upload artifact
@@ -117,8 +117,8 @@ jobs:
         with:
           name: binary-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
-            sindri-agent-${{ matrix.goos }}-${{ matrix.goarch }}
-            sindri-agent-${{ matrix.goos }}-${{ matrix.goarch }}.sha256
+            draupnir-${{ matrix.goos }}-${{ matrix.goarch }}
+            draupnir-${{ matrix.goos }}-${{ matrix.goarch }}.sha256
           retention-days: 1
 
   release:
@@ -138,7 +138,7 @@ jobs:
       - name: Flatten artifacts
         run: |
           mkdir -p release-assets
-          find artifacts -type f -name "sindri-agent-*" -exec cp {} release-assets/ \;
+          find artifacts -type f -name "draupnir-*" -exec cp {} release-assets/ \;
       - name: Combine checksums
         run: cat release-assets/*.sha256 > release-assets/checksums.txt
       - name: Create release
@@ -149,5 +149,5 @@ jobs:
           prerelease: ${{ needs.validate-tag.outputs.is_prerelease == 'true' }}
           body: ${{ needs.changelog.outputs.release_body }}
           files: |
-            release-assets/sindri-agent-*
+            release-assets/draupnir-*
             release-assets/checksums.txt

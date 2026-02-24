@@ -15,7 +15,7 @@ BOLD    := \033[1m
 RESET   := \033[0m
 
 GO      := go
-BINARY  := sindri-agent
+BINARY  := draupnir
 
 # ============================================================================
 # Build

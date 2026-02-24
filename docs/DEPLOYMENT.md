@@ -14,7 +14,7 @@ When Sindri provisions an instance and the `draupnir` extension is enabled, it i
 sindri extension install draupnir
 ```
 
-This downloads the correct platform binary, verifies the SHA256 checksum, and installs it to `~/.local/bin/sindri-agent`. No further steps are needed — Sindri configures the environment variables from the instance's deployment configuration.
+This downloads the correct platform binary, verifies the SHA256 checksum, and installs it to `~/.local/bin/draupnir`. No further steps are needed — Sindri configures the environment variables from the instance's deployment configuration.
 
 ### Method 2: Installer script
 
@@ -37,24 +37,24 @@ Download from [GitHub Releases](https://github.com/pacphi/draupnir/releases), ch
 
 | Platform | Binary |
 |----------|--------|
-| Linux amd64 | `sindri-agent-linux-amd64` |
-| Linux arm64 | `sindri-agent-linux-arm64` |
-| macOS amd64 | `sindri-agent-darwin-amd64` |
-| macOS arm64 (M-series) | `sindri-agent-darwin-arm64` |
+| Linux amd64 | `draupnir-linux-amd64` |
+| Linux arm64 | `draupnir-linux-arm64` |
+| macOS amd64 | `draupnir-darwin-amd64` |
+| macOS arm64 (M-series) | `draupnir-darwin-arm64` |
 
 Verify the checksum before use:
 
 ```bash
 # Download binary and checksum
-curl -fsSL https://github.com/pacphi/draupnir/releases/download/v1.0.0/sindri-agent-linux-amd64 -o sindri-agent
+curl -fsSL https://github.com/pacphi/draupnir/releases/download/v1.0.0/draupnir-linux-amd64 -o draupnir
 curl -fsSL https://github.com/pacphi/draupnir/releases/download/v1.0.0/checksums.txt -o checksums.txt
 
 # Verify
 sha256sum --check --ignore-missing checksums.txt
 
 # Install
-chmod +x sindri-agent
-mv sindri-agent /usr/local/bin/sindri-agent
+chmod +x draupnir
+mv draupnir /usr/local/bin/draupnir
 ```
 
 ### Method 4: Build from source
@@ -62,8 +62,8 @@ mv sindri-agent /usr/local/bin/sindri-agent
 ```bash
 git clone https://github.com/pacphi/draupnir.git
 cd draupnir
-make build         # current platform → dist/sindri-agent
-make build-all     # all 4 targets → dist/sindri-agent-{os}-{arch}
+make build         # current platform → dist/draupnir
+make build-all     # all 4 targets → dist/draupnir-{os}-{arch}
 ```
 
 ---
@@ -89,7 +89,7 @@ The agent does not daemonize itself. Process supervision (systemd, runit, Docker
 
 ## Running as a systemd service
 
-Create `/etc/systemd/system/sindri-agent.service`:
+Create `/etc/systemd/system/draupnir.service`:
 
 ```ini
 [Unit]
@@ -101,13 +101,13 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=developer
-EnvironmentFile=/etc/sindri-agent/env
-ExecStart=/usr/local/bin/sindri-agent
+EnvironmentFile=/etc/draupnir/env
+ExecStart=/usr/local/bin/draupnir
 Restart=on-failure
 RestartSec=5s
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=sindri-agent
+SyslogIdentifier=draupnir
 
 # Hardening
 NoNewPrivileges=true
@@ -118,7 +118,7 @@ ProtectSystem=full
 WantedBy=multi-user.target
 ```
 
-Create `/etc/sindri-agent/env` (mode `0600`, owned by root):
+Create `/etc/draupnir/env` (mode `0600`, owned by root):
 
 ```bash
 SINDRI_CONSOLE_URL=https://mimir.example.com
@@ -132,9 +132,9 @@ Enable and start:
 
 ```bash
 systemctl daemon-reload
-systemctl enable sindri-agent
-systemctl start sindri-agent
-journalctl -u sindri-agent -f   # follow logs
+systemctl enable draupnir
+systemctl start draupnir
+journalctl -u draupnir -f   # follow logs
 ```
 
 ---
@@ -149,13 +149,13 @@ services:
   app:
     image: your-app:latest
 
-  sindri-agent:
+  draupnir:
     image: ubuntu:24.04      # or any minimal Linux image
     network_mode: host        # share host network for accurate metrics
     tty: true                 # required for PTY session support
     volumes:
-      - /usr/local/bin/sindri-agent:/usr/local/bin/sindri-agent:ro
-    command: sindri-agent
+      - /usr/local/bin/draupnir:/usr/local/bin/draupnir:ro
+    command: draupnir
     restart: unless-stopped
     environment:
       SINDRI_CONSOLE_URL: ${SINDRI_CONSOLE_URL}
@@ -175,7 +175,7 @@ In a `fly.toml`, add the agent as a process alongside the main app:
 ```toml
 [processes]
   app   = "/bin/start-app.sh"
-  agent = "sindri-agent"
+  agent = "draupnir"
 ```
 
 Set environment variables via Fly secrets:
@@ -205,20 +205,20 @@ spec:
     - name: app
       image: your-app:latest
 
-    - name: sindri-agent
+    - name: draupnir
       image: ubuntu:24.04
-      command: ["/usr/local/bin/sindri-agent"]
+      command: ["/usr/local/bin/draupnir"]
       tty: true
       env:
         - name: SINDRI_CONSOLE_URL
           valueFrom:
             secretKeyRef:
-              name: sindri-agent
+              name: draupnir
               key: consoleUrl
         - name: SINDRI_CONSOLE_API_KEY
           valueFrom:
             secretKeyRef:
-              name: sindri-agent
+              name: draupnir
               key: apiKey
         - name: SINDRI_INSTANCE_ID
           valueFrom:
@@ -230,19 +230,19 @@ spec:
           value: us-east-1
       volumeMounts:
         - name: agent-binary
-          mountPath: /usr/local/bin/sindri-agent
-          subPath: sindri-agent
+          mountPath: /usr/local/bin/draupnir
+          subPath: draupnir
   volumes:
     - name: agent-binary
       configMap:
-        name: sindri-agent-binary
+        name: draupnir-binary
         defaultMode: 0755
 ```
 
 Create the secret:
 
 ```bash
-kubectl create secret generic sindri-agent \
+kubectl create secret generic draupnir \
   --from-literal=consoleUrl=https://mimir.example.com \
   --from-literal=apiKey=sk-...
 ```
