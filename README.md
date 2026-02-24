@@ -1,5 +1,10 @@
 # Draupnir
 
+[![License](https://img.shields.io/github/license/pacphi/draupnir)](LICENSE)
+[![CI](https://github.com/pacphi/draupnir/actions/workflows/ci.yml/badge.svg)](https://github.com/pacphi/draupnir/actions/workflows/ci.yml)
+[![Release](https://github.com/pacphi/draupnir/actions/workflows/release.yml/badge.svg)](https://github.com/pacphi/draupnir/actions/workflows/release.yml)
+[![Test](https://github.com/pacphi/draupnir/actions/workflows/test.yml/badge.svg)](https://github.com/pacphi/draupnir/actions/workflows/test.yml)
+
 Lightweight per-instance agent for [Sindri](https://github.com/pacphi/sindri) environments, connecting to the [Mimir](https://github.com/pacphi/mimir) control plane.
 
 Draupnir runs on each managed instance, providing real-time metrics, remote terminal access, and command dispatch over a persistent WebSocket connection.
