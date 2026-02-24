@@ -2,7 +2,9 @@
 # Draupnir — Sindri Instance Agent
 # ============================================================================
 
-.PHONY: build build-all test fmt fmt-check vet lint audit install clean ci
+.PHONY: build build-all test fmt fmt-check vet lint audit deadcode \
+	deps-upgrade deps-outdated \
+	install clean ci hooks
 
 # ── Color codes ──────────────────────────────────────────────────────────────
 BLUE    := \033[0;34m
@@ -85,6 +87,21 @@ audit:
 	fi
 
 # ============================================================================
+# Dependency Management
+# ============================================================================
+
+deps-upgrade:
+	@echo "$(BLUE)Upgrading Go dependencies to latest...$(RESET)"
+	$(GO) get -u ./...
+	$(GO) mod tidy
+	@echo "$(GREEN)✓ Go dependencies upgraded$(RESET)"
+
+deps-outdated:
+	@echo "$(BLUE)Checking for outdated Go modules...$(RESET)"
+	$(GO) list -m -u all
+	@echo "$(GREEN)✓ Outdated check complete$(RESET)"
+
+# ============================================================================
 # Install & Clean
 # ============================================================================
 
@@ -102,3 +119,25 @@ clean:
 
 ci: vet fmt-check test build-all
 	@echo "$(GREEN)$(BOLD)✓ CI pipeline passed$(RESET)"
+
+# ============================================================================
+# Dead Code Detection
+# ============================================================================
+
+deadcode:
+	@echo "$(BLUE)Scanning for dead code (golang.org/x/tools/cmd/deadcode)...$(RESET)"
+	@if ! command -v deadcode >/dev/null 2>&1; then \
+		echo "$(YELLOW)Installing deadcode...$(RESET)"; \
+		go install golang.org/x/tools/cmd/deadcode@latest; \
+	fi
+	deadcode ./... || true
+	@echo "$(GREEN)✓ Dead code scan complete$(RESET)"
+
+# ============================================================================
+# Git Hooks
+# ============================================================================
+
+hooks:
+	@echo "$(BLUE)Installing git hooks...$(RESET)"
+	git config core.hooksPath .githooks
+	@echo "$(GREEN)✓ Git hooks installed (.githooks/pre-commit)$(RESET)"
