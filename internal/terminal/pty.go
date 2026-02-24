@@ -61,7 +61,7 @@ func (m *Manager) Create(req *protocol.TerminalCreatePayload) error {
 		shell = "/bin/bash"
 	}
 
-	cmd := exec.Command(shell)
+	cmd := exec.Command(shell) //nolint:gosec // G702: shell path is operator/env configured; spawning a shell is intentional
 	cmd.Env = append(os.Environ(), "TERM=xterm-256color")
 
 	ptmx, err := pty.Start(cmd)
