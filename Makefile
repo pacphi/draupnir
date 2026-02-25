@@ -2,9 +2,11 @@
 # Draupnir — Sindri Instance Agent
 # ============================================================================
 
-.PHONY: build build-all test fmt fmt-check vet lint audit deadcode \
+.PHONY: help build build-all test fmt fmt-check vet lint audit deadcode \
 	deps-upgrade deps-outdated \
 	install clean ci hooks
+
+.DEFAULT_GOAL := help
 
 # ── Color codes ──────────────────────────────────────────────────────────────
 BLUE    := \033[0;34m
@@ -13,6 +15,45 @@ YELLOW  := \033[1;33m
 RED     := \033[0;31m
 BOLD    := \033[1m
 RESET   := \033[0m
+
+# ============================================================================
+# Help
+# ============================================================================
+
+help:
+	@echo "$(BOLD)$(BLUE)╔════════════════════════════════════════════════════════════════════╗$(RESET)"
+	@echo "$(BOLD)$(BLUE)║                        Draupnir Makefile                           ║$(RESET)"
+	@echo "$(BOLD)$(BLUE)╚════════════════════════════════════════════════════════════════════╝$(RESET)"
+	@echo ""
+	@echo "$(BOLD)Quick Start:$(RESET)"
+	@echo "  make build             - Build for current platform"
+	@echo "  make test              - Run unit tests"
+	@echo "  make ci                - Run full CI pipeline"
+	@echo "  make install           - Install to ~/.local/bin"
+	@echo ""
+	@echo "$(BOLD)$(BLUE)═══ Build ═══════════════════════════════════════════════════════════$(RESET)"
+	@echo "  build                  - Build agent for current platform (static)"
+	@echo "  build-all              - Cross-compile for linux/darwin (amd64 + arm64)"
+	@echo "  install                - Build and install to ~/.local/bin"
+	@echo "  clean                  - Remove build artifacts (dist/)"
+	@echo ""
+	@echo "$(BOLD)$(BLUE)═══ Test & Quality ══════════════════════════════════════════════════$(RESET)"
+	@echo "  test                   - Run unit tests with race detection"
+	@echo "  fmt                    - Format Go code (gofmt -w)"
+	@echo "  fmt-check              - Check formatting without changes"
+	@echo "  vet                    - Run go vet"
+	@echo "  lint                   - Run golangci-lint (falls back to go vet)"
+	@echo "  audit                  - Run govulncheck vulnerability scan"
+	@echo "  deadcode               - Scan for dead code"
+	@echo ""
+	@echo "$(BOLD)$(BLUE)═══ Dependency Management ═══════════════════════════════════════════$(RESET)"
+	@echo "  deps-upgrade           - Upgrade Go dependencies to latest"
+	@echo "  deps-outdated          - Check for outdated Go modules"
+	@echo ""
+	@echo "$(BOLD)$(BLUE)═══ CI & Tooling ════════════════════════════════════════════════════$(RESET)"
+	@echo "  ci                     - Run full CI pipeline (vet + fmt-check + test + build-all)"
+	@echo "  hooks                  - Install git hooks (.githooks/pre-commit)"
+	@echo ""
 
 GO      := go
 BINARY  := draupnir
