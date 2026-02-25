@@ -6,6 +6,11 @@ name: "Update Sindri Extension"
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to set (e.g. 1.0.0, without v prefix)"
+        required: true
 
 jobs:
   update-extension:
@@ -16,7 +21,12 @@ jobs:
     steps:
       - name: Extract version
         id: version
-        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Checkout sindri
         uses: actions/checkout@v6
@@ -39,6 +49,8 @@ jobs:
       - name: Create PR
         run: |
           cd sindri
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           BRANCH="chore/draupnir-v${{ steps.version.outputs.version }}"
           git checkout -b "$BRANCH"
           git add -A
