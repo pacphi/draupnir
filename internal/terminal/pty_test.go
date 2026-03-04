@@ -3,12 +3,27 @@ package terminal
 import (
 	"log/slog"
 	"os"
+	"os/exec"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/creack/pty"
 	"github.com/pacphi/draupnir/pkg/protocol"
 )
+
+// skipIfNoPTY skips the test when PTY allocation is unavailable (e.g. macOS sandbox).
+func skipIfNoPTY(t *testing.T) {
+	t.Helper()
+	cmd := exec.Command("/bin/sh")
+	ptmx, err := pty.Start(cmd)
+	if err != nil {
+		t.Skipf("PTY not available on this system: %v", err)
+	}
+	ptmx.Close()
+	_ = cmd.Process.Kill()
+	_, _ = cmd.Process.Wait()
+}
 
 type mockSender struct {
 	mu        sync.Mutex
@@ -31,6 +46,7 @@ func newTestLogger() *slog.Logger {
 }
 
 func TestManager_CreateAndClose(t *testing.T) {
+	skipIfNoPTY(t)
 	sender := &mockSender{}
 	mgr := NewManager("/bin/sh", sender, newTestLogger())
 
@@ -82,6 +98,7 @@ func TestManager_ResizeNonexistentSession(t *testing.T) {
 }
 
 func TestManager_Write(t *testing.T) {
+	skipIfNoPTY(t)
 	sender := &mockSender{}
 	mgr := NewManager("/bin/sh", sender, newTestLogger())
 
@@ -103,6 +120,7 @@ func TestManager_Write(t *testing.T) {
 }
 
 func TestManager_CloseAll(t *testing.T) {
+	skipIfNoPTY(t)
 	sender := &mockSender{}
 	mgr := NewManager("/bin/sh", sender, newTestLogger())
 

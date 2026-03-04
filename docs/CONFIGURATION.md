@@ -15,6 +15,9 @@ Draupnir is configured entirely through environment variables. There is no confi
 | [`SINDRI_AGENT_METRICS`](#sindri_agent_metrics) | no | `60` | integer (seconds) |
 | [`SINDRI_AGENT_TAGS`](#sindri_agent_tags) | no | — | string |
 | [`SINDRI_LOG_LEVEL`](#sindri_log_level) | no | `info` | enum |
+| [`SINDRI_LLM_ADAPTER`](#sindri_llm_adapter) | no | `auto` | enum |
+| [`SINDRI_LLM_PROXY_PORT`](#sindri_llm_proxy_port) | no | `9090` | integer (port) |
+| [`SINDRI_LLM_REPORT_INTERVAL`](#sindri_llm_report_interval) | no | `30` | integer (seconds) |
 
 ---
 
@@ -120,6 +123,43 @@ Use `debug` when diagnosing connection or protocol issues. Switch back to `info`
 
 ---
 
+### `SINDRI_LLM_ADAPTER`
+
+Controls LLM traffic interception mode. See [ADR-004](architecture/adr/004-llm-traffic-interception.md) for architecture details.
+
+- **Required:** no
+- **Default:** `auto`
+- **Valid values:**
+
+| Value | Behavior |
+|-------|----------|
+| `auto` | Try eBPF (Tier 2), fall back to proxy (Tier 1) |
+| `proxy` | Tier 1 only — local HTTP reverse proxy |
+| `ebpf` | Tier 2 only — eBPF SSL uprobe (requires Linux 5.8+) |
+| `none` | Disabled — no LLM traffic interception |
+
+---
+
+### `SINDRI_LLM_PROXY_PORT`
+
+Local port for the Tier 1 LLM reverse proxy. Extensions are configured (via Sindri) to send LLM API calls to `http://localhost:<port>/v1/<provider>/...`.
+
+- **Required:** no
+- **Default:** `9090`
+- **Constraints:** valid port number (1-65535), must not conflict with other services
+
+---
+
+### `SINDRI_LLM_REPORT_INTERVAL`
+
+Interval in seconds between LLM usage batch reports sent to Mimir via the WebSocket `llm_usage:batch` message type.
+
+- **Required:** no
+- **Default:** `30`
+- **Type:** positive number (seconds)
+
+---
+
 ## Example: minimal configuration
 
 ```bash
@@ -140,6 +180,7 @@ export SINDRI_AGENT_HEARTBEAT="15"
 export SINDRI_AGENT_METRICS="30"
 export SINDRI_AGENT_TAGS="env=production,team=platform"
 export SINDRI_LOG_LEVEL="info"
+export SINDRI_LLM_ADAPTER="auto"
 draupnir
 ```
 

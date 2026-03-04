@@ -51,6 +51,16 @@ type Config struct {
 
 	// Version is the compiled-in agent version string.
 	Version string
+
+	// LLMAdapter controls the LLM traffic interception mode: "auto", "proxy", "ebpf", "none".
+	// "auto" tries eBPF first, falls back to proxy. Default: "auto".
+	LLMAdapter string
+
+	// LLMProxyPort is the local port for the Tier 1 HTTP proxy. Default: 9090.
+	LLMProxyPort int
+
+	// LLMReportInterval controls how often LLM usage batches are sent to Mimir.
+	LLMReportInterval time.Duration
 }
 
 // Load reads configuration from environment variables.
@@ -115,6 +125,25 @@ func Load(version string) (*Config, error) {
 				cfg.Tags[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
 			}
 		}
+	}
+
+	// LLM adapter mode.
+	cfg.LLMAdapter = envOrDefault("SINDRI_LLM_ADAPTER", "auto")
+	cfg.LLMProxyPort = 9090
+	if v := os.Getenv("SINDRI_LLM_PROXY_PORT"); v != "" {
+		port, err := strconv.Atoi(v)
+		if err != nil || port < 1 || port > 65535 {
+			return nil, fmt.Errorf("SINDRI_LLM_PROXY_PORT must be a valid port number, got %q", v)
+		}
+		cfg.LLMProxyPort = port
+	}
+	cfg.LLMReportInterval = 30 * time.Second
+	if v := os.Getenv("SINDRI_LLM_REPORT_INTERVAL"); v != "" {
+		secs, err := strconv.ParseFloat(v, 64)
+		if err != nil || secs <= 0 {
+			return nil, fmt.Errorf("SINDRI_LLM_REPORT_INTERVAL must be a positive number, got %q", v)
+		}
+		cfg.LLMReportInterval = time.Duration(secs * float64(time.Second))
 	}
 
 	return cfg, nil

@@ -29,3 +29,4 @@ What are the trade-offs, follow-on work, or constraints introduced?
 | [001](001-go-static-binary-agent.md) | Go static binary agent | Accepted |
 | [002](002-websocket-protocol-v1.md) | WebSocket protocol v1 envelope | Accepted |
 | [003](003-environment-based-configuration.md) | Environment-based configuration (no config file) | Accepted |
+| [004](004-llm-traffic-interception.md) | LLM traffic interception via two-tier proxy and eBPF | Accepted |

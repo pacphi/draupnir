@@ -22,6 +22,7 @@ import (
 
 	"github.com/pacphi/draupnir/internal/config"
 	"github.com/pacphi/draupnir/internal/heartbeat"
+	"github.com/pacphi/draupnir/internal/llm"
 	"github.com/pacphi/draupnir/internal/metrics"
 	"github.com/pacphi/draupnir/internal/registration"
 	"github.com/pacphi/draupnir/internal/terminal"
@@ -105,6 +106,16 @@ func run() error {
 
 	// --- Metrics loop ---
 	go runMetricsLoop(ctx, cfg, collector, wsClient, logger)
+
+	// --- LLM traffic adapter ---
+	llmAdapter := llm.NewAdapter(
+		cfg.LLMAdapter,
+		cfg.LLMProxyPort,
+		cfg.LLMReportInterval,
+		(*wsSender)(wsClient),
+		logger,
+	)
+	go llmAdapter.Run(ctx)
 
 	// Block until context is cancelled.
 	<-ctx.Done()

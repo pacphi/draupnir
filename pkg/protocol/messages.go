@@ -23,6 +23,7 @@ const (
 	MsgCommandResult  MessageType = "command:result"
 	MsgEvent          MessageType = "event"
 	MsgRegistration   MessageType = "registration"
+	MsgLLMUsageBatch  MessageType = "llm_usage:batch"
 )
 
 // ProtocolVersion is the current version of the WebSocket protocol.
@@ -157,6 +158,26 @@ type CommandResultPayload struct {
 	Stderr     string `json:"stderr"`
 	ExitCode   int    `json:"exit_code"`
 	DurationMs int64  `json:"duration_ms"`
+}
+
+// LLMUsageRecord captures a single LLM API call's token usage.
+type LLMUsageRecord struct {
+	Provider         string  `json:"provider"`
+	Model            string  `json:"model"`
+	Operation        string  `json:"operation,omitempty"`
+	InputTokens      int     `json:"inputTokens"`
+	OutputTokens     int     `json:"outputTokens"`
+	CacheReadTokens  int     `json:"cacheReadTokens,omitempty"`
+	CacheWriteTokens int     `json:"cacheWriteTokens,omitempty"`
+	CostUsd          float64 `json:"costUsd"`
+	CaptureTier      string  `json:"captureTier,omitempty"`
+	TraceId          string  `json:"traceId,omitempty"`
+	Ts               int64   `json:"ts"`
+}
+
+// LLMUsageBatchPayload is a batch of LLM usage records for a reporting interval.
+type LLMUsageBatchPayload struct {
+	Records []LLMUsageRecord `json:"records"`
 }
 
 // EventPayload carries lifecycle events from the agent.

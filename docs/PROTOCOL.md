@@ -32,6 +32,7 @@ Every message includes a `protocol_version` field in the envelope. This enables 
 | `command:result` | Command execution result | On completion |
 | `event` | Lifecycle event | On occurrence |
 | `registration` | Initial registration | On connect |
+| `llm_usage:batch` | Batch of LLM API token usage records | Every 30s (configurable) |
 
 ### Inbound (Mimir -> Agent)
 
@@ -42,6 +43,31 @@ Every message includes a `protocol_version` field in the envelope. This enables 
 | `terminal:input` | Send keystrokes to PTY |
 | `terminal:resize` | Resize PTY dimensions |
 | `command:dispatch` | Execute a command |
+
+## LLM Usage Batch Payload
+
+The `llm_usage:batch` message carries a batch of LLM API call records captured by the Tier 1 proxy, Tier 2 eBPF interceptor, or Ollama detector:
+
+```json
+{
+  "records": [
+    {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-20250514",
+      "operation": "chat",
+      "inputTokens": 1500,
+      "outputTokens": 500,
+      "cacheReadTokens": 200,
+      "cacheWriteTokens": 0,
+      "costUsd": 0.0120,
+      "captureTier": "proxy",
+      "ts": 1709481600000
+    }
+  ]
+}
+```
+
+Field naming follows [OpenTelemetry GenAI Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/) (`gen_ai.*` namespace).
 
 ## Payload Schemas
 
