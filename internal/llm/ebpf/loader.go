@@ -52,8 +52,12 @@ func isKernel58Plus(version string) bool {
 	}
 	major := 0
 	minor := 0
-	fmt.Sscanf(dotParts[0], "%d", &major)
-	fmt.Sscanf(dotParts[1], "%d", &minor)
+	if _, err := fmt.Sscanf(dotParts[0], "%d", &major); err != nil {
+		return false
+	}
+	if _, err := fmt.Sscanf(dotParts[1], "%d", &minor); err != nil {
+		return false
+	}
 	return major > 5 || (major == 5 && minor >= 8)
 }
 
@@ -130,7 +134,7 @@ func (s *SSLInterceptor) processEvents(ctx context.Context) error {
 	// Will read from ring buffer and parse HTTP request/response pairs
 	// filtered by known LLM API hostnames (SNI / Host header matching).
 	<-ctx.Done()
-	return nil
+	return ctx.Err()
 }
 
 func (s *SSLInterceptor) cleanup() {

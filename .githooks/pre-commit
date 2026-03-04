@@ -18,6 +18,11 @@ go vet ./...
 echo "==> golangci-lint"
 if command -v golangci-lint >/dev/null 2>&1; then
   golangci-lint run ./...
+  # Also lint linux-only files (e.g. eBPF) that are skipped on macOS
+  if [ "$(go env GOOS)" != "linux" ]; then
+    echo "==> golangci-lint (GOOS=linux, cross-platform check)"
+    GOOS=linux golangci-lint run ./...
+  fi
 else
   echo "WARN: golangci-lint not installed, skipping (install: https://golangci-lint.run/install/)"
 fi
