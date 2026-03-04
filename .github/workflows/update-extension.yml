@@ -39,12 +39,23 @@ jobs:
         run: |
           cd sindri
           FILE="v3/extensions/draupnir/extension.yaml"
-          if [ -f "$FILE" ]; then
-            sed -i "s/version: .*/version: ${{ steps.version.outputs.version }}/" "$FILE"
-          else
+          VER="${{ steps.version.outputs.version }}"
+          if [ ! -f "$FILE" ]; then
             echo "::warning::Extension file not found: $FILE"
             exit 0
           fi
+
+          # 1. metadata.version (first occurrence only)
+          sed -i '0,/^  version: .*/s//  version: '"$VER"'/' "$FILE"
+
+          # 2. script args version
+          sed -i 's/args: \["[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"\]/args: ["'"$VER"'"]/' "$FILE"
+
+          # 3. bom tool version
+          sed -i '/^bom:/,/^[a-z]/{s/      version: "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"/      version: "'"$VER"'"/}' "$FILE"
+
+          # 4. purl version tag
+          sed -i 's|purl: pkg:github/pacphi/draupnir@v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*|purl: pkg:github/pacphi/draupnir@v'"$VER"'|' "$FILE"
 
       - name: Create PR
         run: |
