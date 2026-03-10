@@ -4,6 +4,13 @@ All notable changes to Draupnir are documented here. The format follows [Keep a 
 
 This file is automatically updated by the release workflow on each tagged release. Do not edit it by hand — use [Conventional Commits](https://www.conventionalcommits.org/) in your commit messages and the changelog will reflect your changes at the next release.
 
+## [1.1.1] — 2026-03-10
+
+### Added
+
+- Send instance ID header on WebSocket and registration requests ([`35902aa`](https://github.com/pacphi/draupnir/commit/35902aa5511e842da4936fb799b1c3b74652ecfb))
+
+
 ## [1.1.0] — 2026-03-04
 
 ### Added
@@ -62,6 +69,7 @@ This file is automatically updated by the release workflow on each tagged releas
 - Add RELEASE.md to docs directory ([`e21a2e8`](https://github.com/pacphi/draupnir/commit/e21a2e85211a6d185877bf41d876ff01efa4f8e2))
 
 
+[1.1.1]: https://github.com/pacphi/draupnir/releases/tag/v1.1.1
 [1.1.0]: https://github.com/pacphi/draupnir/releases/tag/v1.1.0
 [1.0.0]: https://github.com/pacphi/draupnir/releases/tag/v1.0.0
 
