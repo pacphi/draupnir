@@ -28,22 +28,24 @@ type Handler func(env protocol.Envelope) error
 
 // Client maintains a resilient WebSocket connection to the Console.
 type Client struct {
-	url     string
-	apiKey  string
-	handler Handler
-	logger  *slog.Logger
+	url        string
+	apiKey     string
+	instanceID string
+	handler    Handler
+	logger     *slog.Logger
 
 	mu   sync.Mutex
 	conn *gorillaws.Conn
 }
 
 // NewClient creates a Client. handler receives all inbound Envelopes.
-func NewClient(url, apiKey string, handler Handler, logger *slog.Logger) *Client {
+func NewClient(url, apiKey, instanceID string, handler Handler, logger *slog.Logger) *Client {
 	return &Client{
-		url:     url,
-		apiKey:  apiKey,
-		handler: handler,
-		logger:  logger,
+		url:        url,
+		apiKey:     apiKey,
+		instanceID: instanceID,
+		handler:    handler,
+		logger:     logger,
 	}
 }
 
@@ -104,6 +106,7 @@ func (c *Client) connect(ctx context.Context) error {
 	}
 	headers := http.Header{
 		"Authorization": {"Bearer " + c.apiKey},
+		"X-Instance-ID": {c.instanceID},
 	}
 
 	conn, resp, err := dialer.DialContext(ctx, c.url, headers)

@@ -87,7 +87,7 @@ func run() error {
 	// Build the inbound message handler.
 	handler := buildHandler(cfg, termMgr, logger)
 
-	wsClient = agentws.NewClient(cfg.WebSocketURL(), cfg.APIKey, handler, logger)
+	wsClient = agentws.NewClient(cfg.WebSocketURL(), cfg.APIKey, cfg.InstanceID, handler, logger)
 
 	// Wire the terminal manager's sender to the WebSocket client.
 	// We use a thin adapter so terminal.Manager stays decoupled from the WS package.
@@ -95,7 +95,7 @@ func run() error {
 
 	// Rebuild handler with the properly wired terminal manager.
 	handler = buildHandler(cfg, termMgr, logger)
-	wsClient = agentws.NewClient(cfg.WebSocketURL(), cfg.APIKey, handler, logger)
+	wsClient = agentws.NewClient(cfg.WebSocketURL(), cfg.APIKey, cfg.InstanceID, handler, logger)
 
 	// Run the WebSocket loop in the background.
 	go wsClient.Run(ctx)

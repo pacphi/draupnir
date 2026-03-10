@@ -105,7 +105,7 @@ func (p *Proxy) handleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Forward the request
-	proxyReq, err := http.NewRequestWithContext(r.Context(), r.Method, targetURL, r.Body)
+	proxyReq, err := http.NewRequestWithContext(r.Context(), r.Method, targetURL, r.Body) //nolint:gosec // G704: URL built from trusted provider config, not user input
 	if err != nil {
 		http.Error(w, "failed to create proxy request", http.StatusInternalServerError)
 		return

@@ -59,7 +59,7 @@ func TestClient_ConnectsAndSends(t *testing.T) {
 	defer srv.Close()
 
 	handler := func(env protocol.Envelope) error { return nil }
-	client := NewClient(wsURL(srv), "test-key", handler, newTestLogger())
+	client := NewClient(wsURL(srv), "test-key", "test-instance", handler, newTestLogger())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
@@ -92,7 +92,7 @@ func TestClient_ConnectsAndSends(t *testing.T) {
 
 func TestClient_SendBeforeConnect(t *testing.T) {
 	handler := func(env protocol.Envelope) error { return nil }
-	client := NewClient("ws://localhost:0", "key", handler, newTestLogger())
+	client := NewClient("ws://localhost:0", "key", "test-instance", handler, newTestLogger())
 
 	err := client.Send(protocol.Envelope{Type: protocol.MsgHeartbeat})
 	if err == nil {
@@ -126,7 +126,7 @@ func TestClient_HandlerCalledForInbound(t *testing.T) {
 		mu.Unlock()
 		return nil
 	}
-	client := NewClient(wsURL(srv), "key", handler, newTestLogger())
+	client := NewClient(wsURL(srv), "key", "test-instance", handler, newTestLogger())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
@@ -162,7 +162,7 @@ func TestClient_ReconnectsAfterDisconnect(t *testing.T) {
 	defer srv.Close()
 
 	handler := func(env protocol.Envelope) error { return nil }
-	client := NewClient(wsURL(srv), "key", handler, newTestLogger())
+	client := NewClient(wsURL(srv), "key", "test-instance", handler, newTestLogger())
 
 	// The reconnect base wait is 2s, so we need to run long enough to see
 	// at least two connections: one initial + one after the first reconnect delay.

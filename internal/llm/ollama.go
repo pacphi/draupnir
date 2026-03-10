@@ -55,7 +55,7 @@ func (d *OllamaDetector) isRunning(ctx context.Context) bool {
 	if err != nil {
 		return false
 	}
-	resp, err := client.Do(req) //nolint:gosec // URL is from trusted constant ollamaDefaultAddr
+	resp, err := client.Do(req)
 	if err != nil {
 		return false
 	}
@@ -69,7 +69,7 @@ func (d *OllamaDetector) checkRunningModels(ctx context.Context) {
 	if err != nil {
 		return
 	}
-	resp, err := client.Do(req) //nolint:gosec // URL is from trusted constant ollamaDefaultAddr
+	resp, err := client.Do(req)
 	if err != nil {
 		return
 	}

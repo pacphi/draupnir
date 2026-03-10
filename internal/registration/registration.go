@@ -74,8 +74,9 @@ func (r *Registrar) post(ctx context.Context, body []byte) error {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+r.cfg.APIKey)
 	req.Header.Set("X-Agent-Version", r.cfg.Version)
+	req.Header.Set("X-Instance-ID", r.cfg.InstanceID)
 
-	resp, err := r.client.Do(req) //nolint:gosec // G704: URL is operator-configured, not user-controlled
+	resp, err := r.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("HTTP POST: %w", err)
 	}
