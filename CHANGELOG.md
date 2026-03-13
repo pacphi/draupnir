@@ -4,6 +4,13 @@ All notable changes to Draupnir are documented here. The format follows [Keep a 
 
 This file is automatically updated by the release workflow on each tagged release. Do not edit it by hand — use [Conventional Commits](https://www.conventionalcommits.org/) in your commit messages and the changelog will reflect your changes at the next release.
 
+## [1.2.0] — 2026-03-13
+
+### Added
+
+- Add real-time log file streaming from agent to console ([`41f58e6`](https://github.com/pacphi/draupnir/commit/41f58e63935129daff6c06e1aba8e073a8a00b78))
+
+
 ## [1.1.2] — 2026-03-13
 
 ### Added
@@ -76,6 +83,7 @@ This file is automatically updated by the release workflow on each tagged releas
 - Add RELEASE.md to docs directory ([`e21a2e8`](https://github.com/pacphi/draupnir/commit/e21a2e85211a6d185877bf41d876ff01efa4f8e2))
 
 
+[1.2.0]: https://github.com/pacphi/draupnir/releases/tag/v1.2.0
 [1.1.2]: https://github.com/pacphi/draupnir/releases/tag/v1.1.2
 [1.1.1]: https://github.com/pacphi/draupnir/releases/tag/v1.1.1
 [1.1.0]: https://github.com/pacphi/draupnir/releases/tag/v1.1.0
