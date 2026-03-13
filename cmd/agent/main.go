@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/exec"
 	"os/signal"
 	"syscall"
 	"time"
@@ -84,17 +85,26 @@ func run() error {
 	var wsClient *agentws.Client
 	termMgr := terminal.NewManager(cfg.Shell, nil, logger) // sender set below
 
+	// sendFunc is an indirect sender that always uses the current wsClient.
+	// This avoids circular init issues — the handler closure captures sendFunc,
+	// which in turn calls wsClient.Send at dispatch time.
+	sendFunc := func(env protocol.Envelope) error {
+		if wsClient == nil {
+			return fmt.Errorf("not connected")
+		}
+		return wsClient.Send(env)
+	}
+
 	// Build the inbound message handler.
-	handler := buildHandler(cfg, termMgr, logger)
+	handler := buildHandler(cfg, termMgr, sendFunc, logger)
 
 	wsClient = agentws.NewClient(cfg.WebSocketURL(), cfg.APIKey, cfg.InstanceID, handler, logger)
 
 	// Wire the terminal manager's sender to the WebSocket client.
-	// We use a thin adapter so terminal.Manager stays decoupled from the WS package.
 	termMgr = terminal.NewManager(cfg.Shell, (*wsSender)(wsClient), logger)
 
 	// Rebuild handler with the properly wired terminal manager.
-	handler = buildHandler(cfg, termMgr, logger)
+	handler = buildHandler(cfg, termMgr, sendFunc, logger)
 	wsClient = agentws.NewClient(cfg.WebSocketURL(), cfg.APIKey, cfg.InstanceID, handler, logger)
 
 	// Run the WebSocket loop in the background.
@@ -125,7 +135,7 @@ func run() error {
 }
 
 // buildHandler returns a Handler that dispatches inbound Console messages.
-func buildHandler(_ *config.Config, termMgr *terminal.Manager, logger *slog.Logger) agentws.Handler {
+func buildHandler(_ *config.Config, termMgr *terminal.Manager, sendFn func(protocol.Envelope) error, logger *slog.Logger) agentws.Handler {
 	return func(env protocol.Envelope) error {
 		switch env.Type {
 		case protocol.MsgTerminalCreate:
@@ -137,6 +147,8 @@ func buildHandler(_ *config.Config, termMgr *terminal.Manager, logger *slog.Logg
 		case protocol.MsgTerminalClose:
 			termMgr.Close(env.SessionID)
 			return nil
+		case protocol.MsgCommandDispatch:
+			return handleCommandDispatch(env, sendFn, logger)
 		default:
 			logger.Debug("unhandled message type", "type", env.Type)
 			return nil
@@ -240,6 +252,59 @@ func decodePayload[T any](raw interface{}) (T, error) {
 		return zero, err
 	}
 	return out, nil
+}
+
+func handleCommandDispatch(env protocol.Envelope, sendFn func(protocol.Envelope) error, logger *slog.Logger) error {
+	req, err := decodePayload[protocol.CommandDispatchPayload](env.Payload)
+	if err != nil {
+		return fmt.Errorf("decode command:dispatch: %w", err)
+	}
+
+	logger.Info("executing command", "command_id", req.CommandID, "command", req.Command, "args", req.Args)
+
+	start := time.Now()
+	timeoutMs := req.TimeoutMs
+	if timeoutMs <= 0 {
+		timeoutMs = 30_000
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutMs)*time.Millisecond)
+	defer cancel()
+
+	args := req.Args
+	if len(args) == 0 {
+		// If no args, run via shell so pipes/redirects work
+		args = []string{"-c", req.Command}
+		req.Command = "/bin/bash"
+	}
+
+	cmd := exec.CommandContext(ctx, req.Command, args...)
+	cmd.Env = append(os.Environ(), req.Env...)
+
+	out, cmdErr := cmd.CombinedOutput()
+	durationMs := time.Since(start).Milliseconds()
+
+	exitCode := 0
+	if cmdErr != nil {
+		if exitErr, ok := cmdErr.(*exec.ExitError); ok {
+			exitCode = exitErr.ExitCode()
+		} else {
+			exitCode = -1
+		}
+	}
+
+	result := protocol.CommandResultPayload{
+		CommandID:  req.CommandID,
+		Stdout:     string(out),
+		Stderr:     "",
+		ExitCode:   exitCode,
+		DurationMs: durationMs,
+	}
+
+	return sendFn(protocol.Envelope{
+		ProtocolVersion: protocol.ProtocolVersion,
+		Type:            protocol.MsgCommandResult,
+		Payload:         result,
+	})
 }
 
 // newLogger builds a structured slog.Logger for the given level string.

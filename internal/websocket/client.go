@@ -34,8 +34,9 @@ type Client struct {
 	handler    Handler
 	logger     *slog.Logger
 
-	mu   sync.Mutex
-	conn *gorillaws.Conn
+	mu      sync.Mutex
+	conn    *gorillaws.Conn
+	writeMu sync.Mutex // guards all WebSocket writes (Send + pingLoop)
 }
 
 // NewClient creates a Client. handler receives all inbound Envelopes.
@@ -95,6 +96,8 @@ func (c *Client) Send(env protocol.Envelope) error {
 		return fmt.Errorf("marshalling envelope: %w", err)
 	}
 
+	c.writeMu.Lock()
+	defer c.writeMu.Unlock()
 	conn.SetWriteDeadline(time.Now().Add(writeTimeout)) //nolint:errcheck
 	return conn.WriteMessage(gorillaws.TextMessage, data)
 }
@@ -181,15 +184,20 @@ func (c *Client) pingLoop(ctx context.Context, conn *gorillaws.Conn) {
 	for {
 		select {
 		case <-ticker.C:
+			c.writeMu.Lock()
 			conn.SetWriteDeadline(time.Now().Add(writeTimeout)) //nolint:errcheck
-			if err := conn.WriteMessage(gorillaws.PingMessage, nil); err != nil {
+			err := conn.WriteMessage(gorillaws.PingMessage, nil)
+			c.writeMu.Unlock()
+			if err != nil {
 				c.logger.Debug("ping failed", "error", err)
 				return
 			}
 		case <-ctx.Done():
 			// Send a clean close frame.
+			c.writeMu.Lock()
 			_ = conn.WriteMessage(gorillaws.CloseMessage,
 				gorillaws.FormatCloseMessage(gorillaws.CloseNormalClosure, "agent shutdown"))
+			c.writeMu.Unlock()
 			return
 		}
 	}
