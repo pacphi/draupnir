@@ -24,6 +24,7 @@ import (
 	"github.com/pacphi/draupnir/internal/config"
 	"github.com/pacphi/draupnir/internal/heartbeat"
 	"github.com/pacphi/draupnir/internal/llm"
+	"github.com/pacphi/draupnir/internal/logstream"
 	"github.com/pacphi/draupnir/internal/metrics"
 	"github.com/pacphi/draupnir/internal/registration"
 	"github.com/pacphi/draupnir/internal/terminal"
@@ -95,8 +96,12 @@ func run() error {
 		return wsClient.Send(env)
 	}
 
+	// --- Log streaming ---
+	logWatcher := logstream.NewWatcher("", &senderAdapter{fn: sendFunc}, logger)
+	defer logWatcher.Close()
+
 	// Build the inbound message handler.
-	handler := buildHandler(cfg, termMgr, sendFunc, logger)
+	handler := buildHandler(cfg, termMgr, logWatcher, sendFunc, logger)
 
 	wsClient = agentws.NewClient(cfg.WebSocketURL(), cfg.APIKey, cfg.InstanceID, handler, logger)
 
@@ -104,7 +109,7 @@ func run() error {
 	termMgr = terminal.NewManager(cfg.Shell, (*wsSender)(wsClient), logger)
 
 	// Rebuild handler with the properly wired terminal manager.
-	handler = buildHandler(cfg, termMgr, sendFunc, logger)
+	handler = buildHandler(cfg, termMgr, logWatcher, sendFunc, logger)
 	wsClient = agentws.NewClient(cfg.WebSocketURL(), cfg.APIKey, cfg.InstanceID, handler, logger)
 
 	// Run the WebSocket loop in the background.
@@ -135,7 +140,7 @@ func run() error {
 }
 
 // buildHandler returns a Handler that dispatches inbound Console messages.
-func buildHandler(_ *config.Config, termMgr *terminal.Manager, sendFn func(protocol.Envelope) error, logger *slog.Logger) agentws.Handler {
+func buildHandler(_ *config.Config, termMgr *terminal.Manager, logW *logstream.Watcher, sendFn func(protocol.Envelope) error, logger *slog.Logger) agentws.Handler {
 	return func(env protocol.Envelope) error {
 		switch env.Type {
 		case protocol.MsgTerminalCreate:
@@ -149,6 +154,10 @@ func buildHandler(_ *config.Config, termMgr *terminal.Manager, sendFn func(proto
 			return nil
 		case protocol.MsgCommandDispatch:
 			return handleCommandDispatch(env, sendFn, logger)
+		case protocol.MsgLogSubscribe:
+			return handleLogSubscribe(env, logW, logger)
+		case protocol.MsgLogUnsubscribe:
+			return handleLogUnsubscribe(env, logW, logger)
 		default:
 			logger.Debug("unhandled message type", "type", env.Type)
 			return nil
@@ -305,6 +314,35 @@ func handleCommandDispatch(env protocol.Envelope, sendFn func(protocol.Envelope)
 		Type:            protocol.MsgCommandResult,
 		Payload:         result,
 	})
+}
+
+func handleLogSubscribe(env protocol.Envelope, logW *logstream.Watcher, logger *slog.Logger) error {
+	req, err := decodePayload[protocol.LogSubscribePayload](env.Payload)
+	if err != nil {
+		return fmt.Errorf("log:subscribe payload: %w", err)
+	}
+	logger.Info("log subscribe", "paths", req.Paths)
+	logW.Subscribe(req.Paths)
+	return nil
+}
+
+func handleLogUnsubscribe(env protocol.Envelope, logW *logstream.Watcher, logger *slog.Logger) error {
+	req, err := decodePayload[protocol.LogUnsubscribePayload](env.Payload)
+	if err != nil {
+		return fmt.Errorf("log:unsubscribe payload: %w", err)
+	}
+	logger.Info("log unsubscribe", "paths", req.Paths)
+	logW.Unsubscribe(req.Paths)
+	return nil
+}
+
+// senderAdapter adapts a send function to the logstream.Sender interface.
+type senderAdapter struct {
+	fn func(protocol.Envelope) error
+}
+
+func (s *senderAdapter) Send(env protocol.Envelope) error {
+	return s.fn(env)
 }
 
 // newLogger builds a structured slog.Logger for the given level string.

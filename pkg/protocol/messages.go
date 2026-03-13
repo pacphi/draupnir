@@ -24,6 +24,12 @@ const (
 	MsgEvent          MessageType = "event"
 	MsgRegistration   MessageType = "registration"
 	MsgLLMUsageBatch  MessageType = "llm_usage:batch"
+
+	// Log streaming (Console ↔ Agent)
+	MsgLogSubscribe   MessageType = "log:subscribe"
+	MsgLogUnsubscribe MessageType = "log:unsubscribe"
+	MsgLogLine        MessageType = "log:line"
+	MsgLogBatch       MessageType = "log:batch"
 )
 
 // ProtocolVersion is the current version of the WebSocket protocol.
@@ -178,6 +184,37 @@ type LLMUsageRecord struct {
 // LLMUsageBatchPayload is a batch of LLM usage records for a reporting interval.
 type LLMUsageBatchPayload struct {
 	Records []LLMUsageRecord `json:"records"`
+}
+
+// LogSubscribePayload is sent by the console to start streaming log files.
+type LogSubscribePayload struct {
+	Paths []string `json:"paths"` // relative to ~/.sindri/logs/
+}
+
+// LogUnsubscribePayload is sent by the console to stop streaming log files.
+type LogUnsubscribePayload struct {
+	Paths []string `json:"paths,omitempty"` // if empty, unsubscribe all
+}
+
+// LogLinePayload is a single log line streamed to the console.
+type LogLinePayload struct {
+	Path      string `json:"path"` // relative to ~/.sindri/logs/
+	Line      string `json:"line"`
+	Timestamp int64  `json:"timestamp"`       // Unix ms
+	Level     string `json:"level,omitempty"` // parsed from line content
+}
+
+// LogBatchPayload is a batch of log lines streamed to the console.
+type LogBatchPayload struct {
+	Path  string         `json:"path"`
+	Lines []LogLineEntry `json:"lines"`
+}
+
+// LogLineEntry is a single entry in a log batch.
+type LogLineEntry struct {
+	Line      string `json:"line"`
+	Timestamp int64  `json:"timestamp"`
+	Level     string `json:"level,omitempty"`
 }
 
 // EventPayload carries lifecycle events from the agent.
