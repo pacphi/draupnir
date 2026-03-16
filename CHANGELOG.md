@@ -4,6 +4,13 @@ All notable changes to Draupnir are documented here. The format follows [Keep a 
 
 This file is automatically updated by the release workflow on each tagged release. Do not edit it by hand — use [Conventional Commits](https://www.conventionalcommits.org/) in your commit messages and the changelog will reflect your changes at the next release.
 
+## [1.2.1] — 2026-03-16
+
+### Added
+
+- **logstream:** Add wildcard subscription with historical backfill ([`01ca066`](https://github.com/pacphi/draupnir/commit/01ca066add4bb2cb20a20a12c34e610a14994f66))
+
+
 ## [1.2.0] — 2026-03-13
 
 ### Added
@@ -83,6 +90,7 @@ This file is automatically updated by the release workflow on each tagged releas
 - Add RELEASE.md to docs directory ([`e21a2e8`](https://github.com/pacphi/draupnir/commit/e21a2e85211a6d185877bf41d876ff01efa4f8e2))
 
 
+[1.2.1]: https://github.com/pacphi/draupnir/releases/tag/v1.2.1
 [1.2.0]: https://github.com/pacphi/draupnir/releases/tag/v1.2.0
 [1.1.2]: https://github.com/pacphi/draupnir/releases/tag/v1.1.2
 [1.1.1]: https://github.com/pacphi/draupnir/releases/tag/v1.1.1
