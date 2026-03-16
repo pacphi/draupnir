@@ -60,7 +60,27 @@ func NewWatcher(basePath string, sender Sender, logger *slog.Logger) *Watcher {
 }
 
 // Subscribe starts tailing the specified files. Paths are relative to basePath.
+// The special path "*" triggers auto-discovery of all .log files under basePath.
 func (w *Watcher) Subscribe(paths []string) {
+	w.subscribe(paths, false)
+}
+
+func (w *Watcher) subscribe(paths []string, fromStart bool) {
+	// Handle wildcard: discover all .log files recursively.
+	// Wildcard subscriptions read from the beginning to backfill historical data.
+	for _, p := range paths {
+		if p == "*" {
+			discovered := w.discoverLogFiles()
+			if len(discovered) == 0 {
+				w.logger.Info("log subscribe: wildcard matched no .log files", "basePath", w.basePath)
+				return
+			}
+			w.logger.Info("log subscribe: wildcard discovered files", "count", len(discovered))
+			w.subscribe(discovered, true)
+			return
+		}
+	}
+
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
@@ -77,16 +97,38 @@ func (w *Watcher) Subscribe(paths []string) {
 		absPath := filepath.Join(w.basePath, p)
 		ctx, cancel := context.WithCancel(context.Background())
 		ft := &fileTailer{
-			relPath: p,
-			absPath: absPath,
-			sender:  w.sender,
-			logger:  w.logger,
-			cancel:  cancel,
+			relPath:   p,
+			absPath:   absPath,
+			sender:    w.sender,
+			logger:    w.logger,
+			cancel:    cancel,
+			fromStart: fromStart,
 		}
 		w.tailers[p] = ft
 		go ft.run(ctx)
-		w.logger.Info("log subscribe: started tailing", "path", p)
+		w.logger.Info("log subscribe: started tailing", "path", p, "fromStart", fromStart)
 	}
+}
+
+// discoverLogFiles walks basePath and returns relative paths to all .log files.
+func (w *Watcher) discoverLogFiles() []string {
+	var paths []string
+	_ = filepath.Walk(w.basePath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if strings.HasSuffix(info.Name(), ".log") {
+			rel, relErr := filepath.Rel(w.basePath, path)
+			if relErr == nil {
+				paths = append(paths, rel)
+			}
+		}
+		return nil
+	})
+	return paths
 }
 
 // Unsubscribe stops tailing specified files. If paths is empty, stops all.
@@ -134,18 +176,21 @@ func validatePath(p string) error {
 
 // fileTailer reads new lines appended to a single log file.
 type fileTailer struct {
-	relPath string
-	absPath string
-	sender  Sender
-	logger  *slog.Logger
-	cancel  context.CancelFunc
+	relPath   string
+	absPath   string
+	sender    Sender
+	logger    *slog.Logger
+	cancel    context.CancelFunc
+	fromStart bool // when true, read from the beginning to backfill historical data
 }
 
 func (ft *fileTailer) run(ctx context.Context) {
-	// Seek to the end of the file on start.
+	// Seek to the end of the file on start, unless fromStart is set.
 	var offset int64
-	if info, err := os.Stat(ft.absPath); err == nil {
-		offset = info.Size()
+	if !ft.fromStart {
+		if info, err := os.Stat(ft.absPath); err == nil {
+			offset = info.Size()
+		}
 	}
 
 	pollTicker := time.NewTicker(pollInterval)
