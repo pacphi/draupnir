@@ -49,6 +49,8 @@ type HeartbeatPayload struct {
 	InstanceID string    `json:"instance_id"`
 	Timestamp  time.Time `json:"timestamp"`
 	Uptime     int64     `json:"uptime_seconds"`
+	Distro     string    `json:"distro,omitempty"`
+	Extensions []string  `json:"extensions,omitempty"`
 }
 
 // MetricsPayload carries a snapshot of system resource usage.
@@ -107,10 +109,12 @@ type RegistrationPayload struct {
 	Hostname     string            `json:"hostname"`
 	Provider     string            `json:"provider"`
 	Region       string            `json:"region"`
+	Distro       string            `json:"distro,omitempty"`
 	AgentVersion string            `json:"agent_version"`
 	OS           string            `json:"os"`
 	Arch         string            `json:"arch"`
 	Tags         map[string]string `json:"tags,omitempty"`
+	Extensions   []string          `json:"extensions,omitempty"`
 	Timestamp    time.Time         `json:"timestamp"`
 }
 

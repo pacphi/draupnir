@@ -6,11 +6,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"runtime"
 	"time"
 
 	"github.com/pacphi/draupnir/internal/config"
+	"github.com/pacphi/draupnir/internal/extensions"
 	"github.com/pacphi/draupnir/pkg/protocol"
 )
 
@@ -20,15 +22,17 @@ const registrationTimeout = 15 * time.Second
 type Registrar struct {
 	cfg    *config.Config
 	client *http.Client
+	logger *slog.Logger
 }
 
 // New creates a Registrar with sensible HTTP timeouts.
-func New(cfg *config.Config) *Registrar {
+func New(cfg *config.Config, logger *slog.Logger) *Registrar {
 	return &Registrar{
 		cfg: cfg,
 		client: &http.Client{
 			Timeout: registrationTimeout,
 		},
+		logger: logger,
 	}
 }
 
@@ -98,10 +102,12 @@ func (r *Registrar) buildPayload() protocol.RegistrationPayload {
 		Hostname:     r.cfg.InstanceID,
 		Provider:     r.cfg.Provider,
 		Region:       r.cfg.Region,
+		Distro:       r.cfg.Distro,
 		AgentVersion: r.cfg.Version,
 		OS:           runtime.GOOS,
 		Arch:         runtime.GOARCH,
 		Tags:         r.cfg.Tags,
+		Extensions:   extensions.Discover(r.logger),
 		Timestamp:    time.Now().UTC(),
 	}
 }

@@ -39,7 +39,7 @@ func (s *captureSender) first() protocol.Envelope {
 func TestManager_SendsImmediately(t *testing.T) {
 	sender := &captureSender{}
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
-	mgr := New("test-id", 10*time.Second, sender, logger)
+	mgr := New("test-id", "", 10*time.Second, sender, logger)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
@@ -71,7 +71,7 @@ func TestManager_TicksAtInterval(t *testing.T) {
 	sender := &captureSender{}
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
 	interval := 50 * time.Millisecond
-	mgr := New("test-id", interval, sender, logger)
+	mgr := New("test-id", "", interval, sender, logger)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
@@ -87,7 +87,7 @@ func TestManager_TicksAtInterval(t *testing.T) {
 func TestManager_StopsOnContextCancel(t *testing.T) {
 	sender := &captureSender{}
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
-	mgr := New("test-id", 10*time.Second, sender, logger)
+	mgr := New("test-id", "", 10*time.Second, sender, logger)
 
 	ctx, cancel := context.WithCancel(context.Background())
 

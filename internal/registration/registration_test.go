@@ -3,6 +3,7 @@ package registration
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,6 +11,8 @@ import (
 	"github.com/pacphi/draupnir/internal/config"
 	"github.com/pacphi/draupnir/pkg/protocol"
 )
+
+var testLogger = slog.Default()
 
 func TestRegistrar_Register_Success(t *testing.T) {
 	var received protocol.RegistrationPayload
@@ -41,7 +44,7 @@ func TestRegistrar_Register_Success(t *testing.T) {
 		Tags:       map[string]string{"env": "test"},
 	}
 
-	reg := New(cfg)
+	reg := New(cfg, testLogger)
 	if err := reg.Register(context.Background()); err != nil {
 		t.Fatalf("Register() error: %v", err)
 	}
@@ -64,7 +67,7 @@ func TestRegistrar_Register_IdempotentConflict(t *testing.T) {
 	defer srv.Close()
 
 	cfg := &config.Config{ConsoleURL: srv.URL, APIKey: "key", InstanceID: "id", Version: "0.1.0", Tags: map[string]string{}}
-	reg := New(cfg)
+	reg := New(cfg, testLogger)
 
 	if err := reg.Register(context.Background()); err != nil {
 		t.Errorf("Register() should treat 409 Conflict as success, got: %v", err)
@@ -78,7 +81,7 @@ func TestRegistrar_Register_ContextCancelled(t *testing.T) {
 	defer srv.Close()
 
 	cfg := &config.Config{ConsoleURL: srv.URL, APIKey: "key", InstanceID: "id", Version: "0.1.0", Tags: map[string]string{}}
-	reg := New(cfg)
+	reg := New(cfg, testLogger)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()

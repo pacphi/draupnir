@@ -43,6 +43,10 @@ type Config struct {
 	// Shell is the default shell spawned for PTY sessions.
 	Shell string
 
+	// Distro is the Linux distribution ID (e.g. "ubuntu", "fedora", "opensuse").
+	// Auto-detected from /etc/os-release when not set via SINDRI_DISTRO.
+	Distro string
+
 	// Tags are arbitrary key=value labels attached to registration metadata.
 	Tags map[string]string
 
@@ -72,6 +76,7 @@ func Load(version string) (*Config, error) {
 		InstanceID:        os.Getenv("SINDRI_INSTANCE_ID"),
 		Provider:          os.Getenv("SINDRI_PROVIDER"),
 		Region:            os.Getenv("SINDRI_REGION"),
+		Distro:            envOrDefault("SINDRI_DISTRO", detectDistro()),
 		Shell:             envOrDefault("SINDRI_AGENT_SHELL", defaultShell),
 		LogLevel:          envOrDefault("SINDRI_LOG_LEVEL", defaultLogLevel),
 		HeartbeatInterval: defaultHeartbeatInterval,
@@ -166,4 +171,25 @@ func envOrDefault(key, def string) string {
 		return v
 	}
 	return def
+}
+
+// detectDistro reads /etc/os-release and returns the ID field (e.g. "ubuntu", "fedora", "opensuse-leap").
+// Returns empty string if detection fails (e.g. on macOS or containers without os-release).
+func detectDistro() string {
+	data, err := os.ReadFile("/etc/os-release")
+	if err != nil {
+		return ""
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.HasPrefix(line, "ID=") {
+			val := strings.TrimPrefix(line, "ID=")
+			val = strings.Trim(val, `"`)
+			// Normalize opensuse variants to "opensuse"
+			if strings.HasPrefix(val, "opensuse") {
+				return "opensuse"
+			}
+			return val
+		}
+	}
+	return ""
 }

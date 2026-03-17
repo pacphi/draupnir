@@ -71,7 +71,7 @@ func run() error {
 	defer cancel()
 
 	// --- Auto-registration ---
-	reg := registration.New(cfg)
+	reg := registration.New(cfg, logger)
 	if err := reg.Register(ctx); err != nil {
 		// Registration failure is non-fatal: log and continue.
 		// The agent can still collect metrics and wait for the Console to come up.
@@ -116,7 +116,7 @@ func run() error {
 	go wsClient.Run(ctx)
 
 	// --- Heartbeat ---
-	hbMgr := heartbeat.New(cfg.InstanceID, cfg.HeartbeatInterval, (*wsSender)(wsClient), logger)
+	hbMgr := heartbeat.New(cfg.InstanceID, cfg.Distro, cfg.HeartbeatInterval, (*wsSender)(wsClient), logger)
 	go hbMgr.Run(ctx)
 
 	// --- Metrics loop ---
