@@ -4,6 +4,13 @@ All notable changes to Draupnir are documented here. The format follows [Keep a 
 
 This file is automatically updated by the release workflow on each tagged release. Do not edit it by hand — use [Conventional Commits](https://www.conventionalcommits.org/) in your commit messages and the changelog will reflect your changes at the next release.
 
+## [1.2.2] — 2026-03-17
+
+### Added
+
+- Add distro detection and extension discovery to agent telemetry ([`272b0f6`](https://github.com/pacphi/draupnir/commit/272b0f652c048c23e413c43ccf90a449688e2e21))
+
+
 ## [1.2.1] — 2026-03-16
 
 ### Added
@@ -90,6 +97,7 @@ This file is automatically updated by the release workflow on each tagged releas
 - Add RELEASE.md to docs directory ([`e21a2e8`](https://github.com/pacphi/draupnir/commit/e21a2e85211a6d185877bf41d876ff01efa4f8e2))
 
 
+[1.2.2]: https://github.com/pacphi/draupnir/releases/tag/v1.2.2
 [1.2.1]: https://github.com/pacphi/draupnir/releases/tag/v1.2.1
 [1.2.0]: https://github.com/pacphi/draupnir/releases/tag/v1.2.0
 [1.1.2]: https://github.com/pacphi/draupnir/releases/tag/v1.1.2
