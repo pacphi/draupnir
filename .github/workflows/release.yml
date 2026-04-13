@@ -142,7 +142,7 @@ jobs:
       - name: Combine checksums
         run: cat release-assets/*.sha256 > release-assets/checksums.txt
       - name: Create release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           token: ${{ secrets.SINDRI_PAT }}
           name: "Draupnir v${{ needs.validate-tag.outputs.version }}"
