@@ -29,7 +29,7 @@ jobs:
           fi
 
       - name: Checkout sindri
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: pacphi/sindri
           token: ${{ secrets.SINDRI_PAT }}
