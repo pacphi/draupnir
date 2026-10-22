@@ -7,7 +7,7 @@ Thank you for your interest in contributing. Draupnir is a lightweight Go agent 
 | Tool | Minimum version | Install |
 |------|----------------|---------|
 | Go | 1.25 | [go.dev/dl](https://go.dev/dl/) |
-| golangci-lint | latest | [golangci-lint.run](https://golangci-lint.run/welcome/install/) |
+| golangci-lint | v2.15.0 (pinned in CI) | [golangci-lint.run](https://golangci-lint.run/welcome/install/) |
 | make | any | OS package manager |
 
 ## Getting started
