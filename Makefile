@@ -170,7 +170,7 @@ deadcode:
 	@echo "$(BLUE)Scanning for dead code (golang.org/x/tools/cmd/deadcode)...$(RESET)"
 	@if ! command -v deadcode >/dev/null 2>&1; then \
 		echo "$(YELLOW)Installing deadcode...$(RESET)"; \
-		go install golang.org/x/tools/cmd/deadcode@latest; \
+		go install golang.org/x/tools/cmd/deadcode@v0.49.0; \
 	fi
 	deadcode ./... || true
 	@echo "$(GREEN)✓ Dead code scan complete$(RESET)"
